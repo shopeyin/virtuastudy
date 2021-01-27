@@ -1,30 +1,56 @@
 import logo from "./logo.svg";
 import "./App.css";
 import React, { useEffect } from "react";
-import { auth } from "./firebase/firebase";
+import { Switch, Route } from "react-router-dom";
+import { auth, createUserProfileDocument } from "./firebase/firebase";
 import { connect } from "react-redux";
 import { setCurrentUser } from "./redux/user/user-action";
-import { signInWithGoogle } from "./firebase/firebase";
-function App({ setCurrentUser }) {
+
+import CreateGroup from "./components/creategroup/CreateGroup";
+
+import HomePage from "./components/home/HomePage";
+function App({ setCurrentUser, currentUser }) {
   let unsubscribeFromAuth = null;
 
   useEffect(() => {
-    unsubscribeFromAuth = auth.onAuthStateChanged((user) => {
-      setCurrentUser(user);
-      console.log(user)
+    unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
+      if (userAuth) {
+        const userRef = await createUserProfileDocument(userAuth);
+
+        userRef.onSnapshot((snapshot) => {
+          setCurrentUser({
+            id: snapshot.id,
+            ...snapshot.data(),
+          });
+        });
+      }
+      setCurrentUser(userAuth);
     });
 
     return () => {
       unsubscribeFromAuth();
     };
   }, []);
+  // const link = currentUser ? <Profile /> : <SignIn />;
+
   return (
     <div className="App container">
-      Virtua App <button onClick={signInWithGoogle}>signInWithGoogle</button>
+      <Switch>
+        <Route exact path="/" component={HomePage} />
+        <Route path="/creategroup" component={CreateGroup} />
+      </Switch>
     </div>
   );
 }
 const mapDispatchToProps = (dispatch) => ({
   setCurrentUser: (user) => dispatch(setCurrentUser(user)),
 });
-export default connect(null, mapDispatchToProps)(App);
+
+const mapStateToProps = (state) => {
+  console.log(state);
+  return {
+    currentUser: state.user.currentUser,
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
