@@ -71,6 +71,29 @@ export const createGroup = async (userAuth, name) => {
   return groupRef;
 };
 
+export const fetchGroup = async (userAuth) => {
+  if (!userAuth) {
+    return;
+  }
+
+//   if (userAuth.id) {
+//     console.log(clicked);
+//     firestore
+//       .collection("users")
+//       .doc(userAuth.id)
+//       .collection("group")
+//       .get()
+//       .then(function (snapshot) {
+//         snapshot.forEach(function (doc) {
+//           console.log(doc.data());
+//           return
+//         });
+//       });
+//   }
+
+//   return doc;
+};
+
 firebase.initializeApp(config);
 
 export const auth = firebase.auth();

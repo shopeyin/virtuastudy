@@ -32,7 +32,7 @@ function App({ setCurrentUser, currentUser }) {
     };
   }, []);
   // const link = currentUser ? <Profile /> : <SignIn />;
-
+ 
   return (
     <div className="App container">
       <Switch>
