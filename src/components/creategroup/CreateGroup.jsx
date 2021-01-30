@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { createGroup, firestore, fetchGroup } from "../../firebase/firebase";
+import { createGroup, firestore } from "../../firebase/firebase";
+import CreatePost from "../post/CreatePost";
 
 function CreateGroup({ currentUser }) {
   const [name, setName] = useState("");
@@ -45,9 +46,7 @@ function CreateGroup({ currentUser }) {
     if (group) {
       let membersList = [];
       await firestore
-        .collection("users")
-        .doc(id)
-        .collection("group")
+        .collection("groupy")
         .doc(group.id)
         .collection("members")
         .get()
@@ -61,25 +60,14 @@ function CreateGroup({ currentUser }) {
           setMembers(membersList);
         });
     }
-
-    // let j = await firestore.collection("users").doc(id);
-    // let l = await j.collection("group").doc("0zzkGOdwkwQyGQhdtmTX");
-    // let m = await l
-    //   .collection("members")
-    //   .get()
-    //   .then((snapshot) => {
-    //     snapshot.forEach((doc) => {
-    //       console.log(doc.id, "=>", doc.data());
-    //     });
-    //   });
   };
   useEffect(() => {
     const fetchData = async () => {
       if (id) {
         firestore
-          .collection("users")
-          .doc(id)
-          .collection("group")
+          .collection("groupy")
+          .where("adminId", "==", id)
+
           .get()
           .then(function (snapshot) {
             snapshot.forEach(function (doc) {
@@ -125,9 +113,8 @@ function CreateGroup({ currentUser }) {
         </button>
       </form>
       <div>
-        <div key={group.id}>
-          {group.name} {group.admin}
-        </div>
+        <h3>Group Name</h3>
+        <div key={group.id}>{group.groupName}</div>
       </div>
 
       <div>
@@ -135,11 +122,12 @@ function CreateGroup({ currentUser }) {
         {members.map((member) => {
           return (
             <div key={member.id}>
-              {member.id} ------------ {member.data.name}
+              {member.id} ------------ {member.data.memberName}
             </div>
           );
         })}
       </div>
+      <CreatePost />
     </div>
   );
 }

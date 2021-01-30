@@ -8,6 +8,7 @@ import { setCurrentUser } from "./redux/user/user-action";
 
 import CreateGroup from "./components/creategroup/CreateGroup";
 
+import MyGroup from "./components/mygroup/MyGroup";
 import HomePage from "./components/home/HomePage";
 function App({ setCurrentUser, currentUser }) {
   let unsubscribeFromAuth = null;
@@ -32,12 +33,13 @@ function App({ setCurrentUser, currentUser }) {
     };
   }, []);
   // const link = currentUser ? <Profile /> : <SignIn />;
- 
+
   return (
     <div className="App container">
       <Switch>
         <Route exact path="/" component={HomePage} />
         <Route path="/creategroup" component={CreateGroup} />
+        <Route path="/mygroup" component={MyGroup} />
       </Switch>
     </div>
   );

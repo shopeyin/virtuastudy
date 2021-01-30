@@ -17,6 +17,7 @@ function Profile({ currentUser }) {
       Profile {currentUser.displayName}
       <button onClick={() => auth.signOut()}>SIGNOUT</button>
       <Link to="/creategroup">CREATE GROUP</Link>
+      <Link to="/mygroup">MY GROUP</Link>
     </div>
   );
 }

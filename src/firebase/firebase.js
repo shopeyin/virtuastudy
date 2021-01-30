@@ -47,28 +47,44 @@ export const createGroup = async (userAuth, name) => {
   }
 
   let groupRef = await firestore
-    .collection("users")
-    .doc(userAuth.id)
-    .collection("group");
-
-  const snapShot = await groupRef.get();
-
-  if (snapShot.empty) {
-    const { displayName } = userAuth;
-    const createdAt = new Date();
-
-    try {
-      await groupRef.add({
-        name: name,
-        admin: displayName,
-        createdAt,
-      });
-    } catch (err) {
-      console.log(err.message);
-    }
-  }
+    .collection("groupy")
+    .add({
+      groupName: name,
+      adminName: userAuth.displayName,
+      adminId: userAuth.id,
+    })
+    .then(function (docRef) {
+      console.log("Document written with ID: ", docRef.id);
+    })
+    .catch(function (error) {
+      console.error("Error adding document: ", error);
+    });
 
   return groupRef;
+};
+
+export const createPost = async (userAuth, title) => {
+  if (!userAuth) {
+    return;
+  }
+  const createdAt = new Date();
+
+  let postRef = await firestore
+    .collection("posts")
+    .add({
+      title: title.topic,
+      adminName: userAuth.displayName,
+      adminId: userAuth.id,
+      datePosted: createdAt,
+    })
+    .then(function (docRef) {
+      console.log("Document written with ID: ", docRef.id);
+    })
+    .catch(function (error) {
+      console.error("Error adding document: ", error);
+    });
+
+  return postRef;
 };
 
 export const fetchGroup = async (userAuth) => {
@@ -76,22 +92,22 @@ export const fetchGroup = async (userAuth) => {
     return;
   }
 
-//   if (userAuth.id) {
-//     console.log(clicked);
-//     firestore
-//       .collection("users")
-//       .doc(userAuth.id)
-//       .collection("group")
-//       .get()
-//       .then(function (snapshot) {
-//         snapshot.forEach(function (doc) {
-//           console.log(doc.data());
-//           return
-//         });
-//       });
-//   }
+  //   if (userAuth.id) {
+  //     console.log(clicked);
+  //     firestore
+  //       .collection("users")
+  //       .doc(userAuth.id)
+  //       .collection("group")
+  //       .get()
+  //       .then(function (snapshot) {
+  //         snapshot.forEach(function (doc) {
+  //           console.log(doc.data());
+  //           return
+  //         });
+  //       });
+  //   }
 
-//   return doc;
+  //   return doc;
 };
 
 firebase.initializeApp(config);
