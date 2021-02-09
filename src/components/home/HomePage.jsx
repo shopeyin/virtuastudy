@@ -2,52 +2,14 @@ import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import Profile from "../profile/Profile";
 import SignIn from "../signin/SignIn";
-import { firestore, fetchGroup } from "../../firebase/firebase";
-function HomePage({ currentUser }) {
-  const [groups, setGroups] = useState([]);
+import { firestore, addGroupToUserTable } from "../../firebase/firebase";
+
+function HomePage({ currentUser, groups, loading, hasErrors }) {
   const link = currentUser ? <Profile /> : <SignIn />;
   let id = currentUser ? currentUser.id : "";
-  useEffect(() => {
-    const fetchAllGroup = async () => {
-      let groupList = [];
-      await firestore
-        .collection("groupy")
-        .get()
-        .then((snapshot) => {
-          snapshot.forEach((doc) => {
-            console.log(doc.data());
-            let id = doc.id;
-            let data = doc.data();
-            groupList.push({ id: id, data: data });
-          });
-          setGroups(groupList);
-        });
-    };
-    fetchAllGroup();
-  }, []);
 
   const addGroupToUser = async (name) => {
-    const memberRef = firestore
-      .collection("users")
-      .doc(id)
-      .collection("mygroup")
-      .doc();
-
-    const snapShot = await memberRef.get();
-
-    if (!snapShot.exists) {
-      const joined = new Date();
-
-      try {
-        await memberRef.set({
-          groupName: name,
-          joined,
-        });
-        console.log("added to user members list");
-      } catch (err) {
-        console.log("error creating users", err.message);
-      }
-    }
+    addGroupToUserTable(id, name);
   };
 
   const JoinGroup = async (groupid, groupname) => {
@@ -76,37 +38,50 @@ function HomePage({ currentUser }) {
         });
         console.log("joined");
         console.log("GROUP HERE OO", groupname);
-        addGroupToUser(groupname)
+        addGroupToUser(groupname);
       } catch (err) {
         console.log("error creating users", err.message);
       }
     }
   };
 
-  console.log(groups);
-  console.log(id);
-  return (
-    <div>
-      {link}
+  const renderGroups = () => {
+    if (loading) return <p>Loading groups...</p>;
+    if (hasErrors) return <p>Unable to display posts.</p>;
+    return (
       <div>
-        <h3>List of Groups</h3>
-        {groups.map((group) => {
+        {groups.map((item) => {
           return (
-            <div key={group.id}>
-              {group.data.groupName} ------------ {group.data.adminName}{" "}
-              <button onClick={() => JoinGroup(group.id, group.data.groupName)}>
+            <div key={item.id}>
+              {item.groupName}{" "}
+              <button onClick={() => JoinGroup(item.id, item.groupName)}>
                 Join group
               </button>
             </div>
           );
         })}
       </div>
+    );
+  };
+
+  return (
+    <div>
+      {link}
+      <div>
+        <h3>List of Groups</h3>
+        <div>{renderGroups()}</div>
+      </div>
     </div>
   );
 }
 const mapStateToProps = (state) => {
+  console.log("HOMEPAGE", state);
   return {
     currentUser: state.user.currentUser,
+    groups: state.group.group,
+    loading: state.group.loading,
+
+    hasErrors: state.group.hasErrors,
   };
 };
 

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import { firestore } from "../../firebase/firebase";
-function MyGroup({ currentUser }) {
+
+function MyGroup({ currentUser, groups }) {
   const [myGroup, setMyGroup] = useState([]);
 
   let id = currentUser ? currentUser.id : "";
@@ -16,7 +18,7 @@ function MyGroup({ currentUser }) {
     data.docs.forEach((item) => {
       let id = item.id;
       let data = item.data();
-      myGroupList.push({ id: id, data: data });
+      myGroupList.push({ id, ...data });
     });
     setMyGroup(myGroupList);
   };
@@ -27,20 +29,31 @@ function MyGroup({ currentUser }) {
     }
   }, [id]);
   console.log(myGroup);
-  console.log("HERE OO");
 
+  console.log(groups);
   return (
     <div>
       My Group
       {myGroup.map((item) => {
-        return <div key={item.id}>{item.data.groupName}</div>;
+        return (
+          <div key={item.id}>
+            {item.groupName}{" "}
+            <Link to="/viewpost" className="btn btn-secondary">
+              View post{" "}
+            </Link>
+          </div>
+        );
       })}
     </div>
   );
 }
 const mapStateToProps = (state) => {
+  console.log(state, "MYGROUP");
   return {
     currentUser: state.user.currentUser,
+    groups: state.group.group,
+    loading: state.group.loading,
+    hasErrors: state.group.hasErrors,
   };
 };
 

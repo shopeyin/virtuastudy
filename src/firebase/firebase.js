@@ -87,27 +87,82 @@ export const createPost = async (userAuth, title) => {
   return postRef;
 };
 
-export const fetchGroup = async (userAuth) => {
+export const fetchMyGroup = async (userAuth) => {
   if (!userAuth) {
     return;
   }
+  let myGroup = [];
+  if (userAuth.id) {
+    const response = firebase
+      .firestore()
+      .collection("groupy")
+      .where("adminId", "==", userAuth.id);
+    const data = await response.get();
+    data.docs.forEach((item) => {
+      let id = item.id;
+      let data = item.data();
+      myGroup.push({ id, ...data });
+      console.log(myGroup);
+    });
+  }
 
-  //   if (userAuth.id) {
-  //     console.log(clicked);
-  //     firestore
-  //       .collection("users")
-  //       .doc(userAuth.id)
-  //       .collection("group")
-  //       .get()
-  //       .then(function (snapshot) {
-  //         snapshot.forEach(function (doc) {
-  //           console.log(doc.data());
-  //           return
-  //         });
-  //       });
-  //   }
+  return myGroup;
+};
 
-  //   return doc;
+export const fetchMyMembers = async (userAuth, group) => {
+  if (!userAuth) {
+    return;
+  }
+  let membersList = [];
+  if (userAuth.id) {
+    const response = await firebase
+      .firestore()
+      .collection("groupy")
+      .doc(group)
+      .collection("members");
+    const data = await response.get();
+    console.log(data);
+    data.docs.forEach((item) => {
+      let id = item.id;
+      let data = item.data();
+      console.log(item.data());
+      membersList.push({ id, ...data });
+    });
+  }
+
+  return membersList;
+};
+
+export const addGroupToUserTable = async (userAuthId, name) => {
+  if (!userAuthId) {
+    return;
+  }
+
+  if (userAuthId) {
+    const memberRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(userAuthId)
+      .collection("mygroup")
+      .doc();
+    const snapShot = await memberRef.get();
+
+    if (!snapShot.exists) {
+      const joined = new Date();
+
+      try {
+        await memberRef.set({
+          groupName: name,
+          joined,
+        });
+        console.log("added to user members list");
+      } catch (err) {
+        console.log("error creating users", err.message);
+      }
+    }
+  }
+
+  return userAuthId;
 };
 
 firebase.initializeApp(config);

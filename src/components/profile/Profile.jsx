@@ -2,16 +2,14 @@ import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { auth, firestore } from "../../firebase/firebase";
+import { signOut } from "../../redux/user/user-action";
 
-function Profile({ currentUser }) {
-  //   console.log(
-  //     firestore
-  //       .collection("users")
-  //       .doc("N4F53uTvEpgUJOgAwtr1QD5RRz33")
-  //       .collection("group")
-  //       .doc("69UmXYVuydWxbJ2Pgl3x")
-  //   );
-
+function Profile({ currentUser, dispatch }) {
+  // let signO = () => {
+  //   auth.signOut();
+  //   console.log("I as clicked");
+  // };
+  console.log(currentUser);
   return (
     <div>
       Profile {currentUser.displayName}
@@ -23,6 +21,7 @@ function Profile({ currentUser }) {
 }
 
 const mapStateToProps = (state) => {
+  //console.log(state);
   return {
     currentUser: state.user.currentUser,
   };

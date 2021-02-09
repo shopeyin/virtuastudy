@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
-import { createGroup, firestore } from "../../firebase/firebase";
+import {
+  createGroup,
+  firestore,
+  fetchMyGroup,
+  fetchMyMembers,
+} from "../../firebase/firebase";
 import CreatePost from "../post/CreatePost";
+import { Link } from "react-router-dom";
 
-function CreateGroup({ currentUser }) {
+import { fetchGroups } from "../../redux/group/group-action";
+
+function CreateGroup({ currentUser, groups }) {
   const [name, setName] = useState("");
   const [group, setGroup] = useState([]);
   const [members, setMembers] = useState([]);
@@ -23,76 +31,33 @@ function CreateGroup({ currentUser }) {
     await createGroup(currentUser, name.name).then((res) => {
       setSubmited(true);
     });
+    e.target.reset();
   };
 
-  //   function isEmpty(obj) {
-  //     return Object.keys(obj).length === 0;
-  //   }
-
-  //   useEffect(() => {
-  //     // let db = await firestore
-  //     //   .collection("users")
-  //     //   .doc(currentUser.id)
-  //     //   .collection("group")
-  //     //   .doc("lPCV5WhG0uMjyN3Ywmjk")
-  //     //   .onSnapshot(function (doc) {
-  //     //     console.log(doc.data());
-  //     //   });
-  //     // console.log(db);
-  //   }, []);
   let id = currentUser ? currentUser.id : "";
 
   const fetchMembers = async () => {
-    if (group) {
-      let membersList = [];
-      await firestore
-        .collection("groupy")
-        .doc(group.id)
-        .collection("members")
-        .get()
-        .then((snapshot) => {
-          snapshot.forEach(function (doc) {
-            let id = doc.id;
-            let data = doc.data();
-            membersList.push({ id: id, data: data });
-          });
-
-          setMembers(membersList);
-        });
+    if (!isEmpty) {
+      let myMembers = await fetchMyMembers(currentUser, group[0].id);
+      console.log(myMembers);
+      setMembers(myMembers);
     }
   };
   useEffect(() => {
     const fetchData = async () => {
       if (id) {
-        firestore
-          .collection("groupy")
-          .where("adminId", "==", id)
-
-          .get()
-          .then(function (snapshot) {
-            snapshot.forEach(function (doc) {
-              setGroup({
-                id: doc.id,
-                ...doc.data(),
-              });
-            });
-            setIsEmpty(false);
-          });
-        await fetchMembers();
+        let myGroup = await fetchMyGroup(currentUser);
+        setGroup(myGroup);
+        setIsEmpty(false);
       }
     };
     fetchData();
+    fetchMembers();
   }, [id, submited, isEmpty]);
 
-  // db.collection("cities").get().then(function(querySnapshot) {
-  //     querySnapshot.forEach(function(doc) {
-  //         // doc.data() is never undefined for query doc snapshots
-  //         console.log(doc.id, " => ", doc.data());
-  //     });
-  // });
-
   console.log("members ooo", members);
-  console.log("group", group);
+  console.log("groooo", group);
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -114,7 +79,16 @@ function CreateGroup({ currentUser }) {
       </form>
       <div>
         <h3>Group Name</h3>
-        <div key={group.id}>{group.groupName}</div>
+        <div>
+          {group.map((item) => {
+            return <div key={item.id}>{item.groupName}</div>;
+          })}
+        </div>
+        <div>
+          <Link to="/addpost" className="btn btn-secondary">
+            Add post{" "}
+          </Link>
+        </div>{" "}
       </div>
 
       <div>
@@ -122,19 +96,29 @@ function CreateGroup({ currentUser }) {
         {members.map((member) => {
           return (
             <div key={member.id}>
-              {member.id} ------------ {member.data.memberName}
+              {member.id} ------------ {member.memberName}
             </div>
           );
         })}
       </div>
-      <CreatePost />
+
+      {/* <CreatePost /> */}
     </div>
   );
 }
 
+// const mapDispatchToProps = (dispatch) => ({
+//   setGroup: (group) => dispatch(setGroup(group)),
+// });
+
 const mapStateToProps = (state) => {
+  console.log(state, "state is here");
   return {
     currentUser: state.user.currentUser,
+    groups: state.group.group,
+    loading: state.group.loading,
+
+    hasErrors: state.group.hasErrors,
   };
 };
 
