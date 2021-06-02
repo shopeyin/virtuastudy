@@ -1,0 +1,28 @@
+.signin{
+    min-height:100vh;
+    background: #654ea3;  
+    background: -webkit-linear-gradient(to right, #eaafc8, #654ea3);  
+    background: linear-gradient(to right, #eaafc8, #654ea3); 
+
+  &-btn{
+    font-size: 1.5rem;
+    transition: all 1s;
+    border-radius: 6px;
+    padding: 1rem 3rem;
+    display: inline-block;
+    color:white;
+    background: #ED213A;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #93291E, #ED213A);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #93291E, #ED213A); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    &:hover{
+        transform: translateY(-2px);
+        box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+    }
+
+}
+
+
+}
+
+

@@ -1,26 +1,30 @@
+
+
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
+
 import {
-  createGroup,
-  firestore,
+  createNewGroup,
+  deleteAdminGroup,
   fetchMyGroup,
   fetchMyMembers,
-} from "../../firebase/firebase";
+  JoinGroup,
+} from "../../firebase/adminGroup";
 import CreatePost from "../post/CreatePost";
 import { Link } from "react-router-dom";
+import { leaveTheGroup } from "../../firebase/userGroup";
+import Group from "./Group";
 
-import { fetchGroups } from "../../redux/group/group-action";
-
-function CreateGroup({ currentUser, groups }) {
+function CreateGroup({ currentUser }) {
   const [name, setName] = useState("");
-  const [group, setGroup] = useState([]);
+  const [myGroup, setMyGroup] = useState([]);
+  const [groupAdded, setGroupAdded] = useState(false);
+  const [groupLoaded, setGroupLoaded] = useState(false);
   const [members, setMembers] = useState([]);
-  const [submited, setSubmited] = useState(false);
-  const [isEmpty, setIsEmpty] = useState(true);
+  const [deleteGroupStatus, setDeleteGroupStatus] = useState(false);
 
   const handleChange = (e) => {
     const { value, name } = e.target;
-
     setName({
       [name]: value,
     });
@@ -28,81 +32,85 @@ function CreateGroup({ currentUser, groups }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await createGroup(currentUser, name.name).then((res) => {
-      setSubmited(true);
-    });
+    await createNewGroup(currentUser, name.name);
+    setGroupAdded(!groupAdded);
+
     e.target.reset();
   };
 
-  let id = currentUser ? currentUser.id : "";
+  const fetchGroupMembers = async () => {
+    if (myGroup.length) {
+      let myMembers = await fetchMyMembers(currentUser, myGroup[0].id);
 
-  const fetchMembers = async () => {
-    if (!isEmpty) {
-      let myMembers = await fetchMyMembers(currentUser, group[0].id);
-      console.log(myMembers);
       setMembers(myMembers);
     }
   };
+
+  const deleteGroup = (groupId) => {
+    deleteAdminGroup(groupId);
+    setDeleteGroupStatus(!deleteGroupStatus);
+    members.length = 0;
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      if (id) {
-        let myGroup = await fetchMyGroup(currentUser);
-        setGroup(myGroup);
-        setIsEmpty(false);
-      }
+    const fetchGroupCreated = async () => {
+      let groupArr = await fetchMyGroup(currentUser);
+      setMyGroup(groupArr);
+      setGroupLoaded(true);
     };
-    fetchData();
-    fetchMembers();
-  }, [id, submited, isEmpty]);
+    fetchGroupCreated();
+  }, [currentUser.id, groupAdded, deleteGroupStatus]);
 
-  console.log("members ooo", members);
-  console.log("groooo", group);
+  useEffect(() => {
+    let groupId = myGroup.length ? myGroup[0].id : "";
+    let groupName = myGroup.length ? myGroup[0].groupName : "";
+    if (myGroup.length) {
+      JoinGroup(currentUser, groupId, groupName);
+      setTimeout(() => fetchGroupMembers(), 3000);
+    }
+  }, [myGroup]);
 
+  let itemsToRender;
+  if (myGroup.length) {
+    itemsToRender = myGroup.map((item) => {
+      return <Group key={item.id} item={item} deleteGroup={deleteGroup} />;
+    });
+  } else if (myGroup.length === 0 && groupLoaded) {
+    itemsToRender = (
+      <div>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="exampleInputTitle">Group Name</label>
+            <input
+              type="text"
+              className="form-control"
+              name="name"
+              id="name"
+              aria-describedby="TitleHelp"
+              onChange={handleChange}
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary">
+            Add group{" "}
+          </button>
+        </form>
+      </div>
+    );
+  }
+  console.log("MEMBERSSS", members, members.length);
+  console.log("MYGROUP", myGroup.length);
   return (
     <div>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="exampleInputTitle">Group Name</label>
-          <input
-            type="text"
-            className="form-control"
-            name="name"
-            id="name"
-            aria-describedby="TitleHelp"
-            onChange={handleChange}
-          />
-        </div>
-
-        <button type="submit" className="btn btn-primary">
-          Add group{" "}
-        </button>
-      </form>
-      <div>
-        <h3>Group Name</h3>
-        <div>
-          {group.map((item) => {
-            return <div key={item.id}>{item.groupName}</div>;
-          })}
-        </div>
-        <div>
-          <Link to="/addpost" className="btn btn-secondary">
-            Add post{" "}
-          </Link>
-        </div>{" "}
-      </div>
-
-      <div>
-        <h3>List of members</h3>
-        {members.map((member) => {
-          return (
-            <div key={member.id}>
-              {member.id} ------------ {member.memberName}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* <CreatePost /> */}
+      <h3>{currentUser ? currentUser.displayName : ""}</h3>
+      {itemsToRender}
+      {members.map((member) => {
+        return (
+          <div key={member.id}>
+            {member.memberName}--{member.id}
+          </div>
+        );
+      })}
     </div>
   );
 }

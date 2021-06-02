@@ -1,54 +1,63 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { firestore } from "../../firebase/firebase";
+
+import { fetchMyGroup, leaveTheGroup } from "../../firebase/userGroup";
 
 function MyGroup({ currentUser, groups }) {
   const [myGroup, setMyGroup] = useState([]);
+  const [leaveGroupStatus, setLeaveGroupStatus] = useState(false);
 
   let id = currentUser ? currentUser.id : "";
 
-  const fetchGroup = async () => {
-    let myGroupList = [];
-    const response = firestore
-      .collection("users")
-      .doc(id)
-      .collection("mygroup");
-    const data = await response.get();
-    data.docs.forEach((item) => {
-      let id = item.id;
-      let data = item.data();
-      myGroupList.push({ id, ...data });
-    });
-    setMyGroup(myGroupList);
+  const fetchUserGroup = async () => {
+    let userGroup = await fetchMyGroup(id);
+    setMyGroup(userGroup);
   };
 
   useEffect(() => {
     if (id) {
-      fetchGroup();
+      fetchUserGroup();
     }
-  }, [id]);
-  console.log(myGroup);
+  }, [id, leaveGroupStatus]);
 
-  console.log(groups);
+  const leaveGroup = (userId, mygroupId, groupyId) => {
+    leaveTheGroup(userId, mygroupId, groupyId);
+    setLeaveGroupStatus(true);
+  };
+
+  const searchItem = (groups, obj) => {
+    if (groups.find((item) => item.id === obj.groupId)) {
+      return true;
+    }
+    return false;
+  };
+  
   return (
     <div>
       My Group
+      <div>{leaveGroupStatus ? "Successfully left the group " : ""}</div>
       {myGroup.map((item) => {
-        return (
-          <div key={item.id}>
-            {item.groupName}{" "}
-            <Link to="/viewpost" className="btn btn-secondary">
-              View post{" "}
-            </Link>
-          </div>
-        );
+        if (searchItem(groups, item)) {
+          return (
+            <div key={item.id}>
+              {item.id}--- {item.groupName} {item.groupId}{" "}
+              <Link to="/viewpost" className="btn btn-secondary">
+                View post{" "}
+              </Link>{" "}
+              <button onClick={() => leaveGroup(id, item.id, item.groupId)}>
+                Leave group
+              </button>
+            </div>
+          );
+        }
       })}
     </div>
   );
 }
+
 const mapStateToProps = (state) => {
-  console.log(state, "MYGROUP");
+  console.log("MYGROUP", state);
   return {
     currentUser: state.user.currentUser,
     groups: state.group.group,

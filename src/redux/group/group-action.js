@@ -1,5 +1,6 @@
 import GroupActionTypes from "./group-type";
 import { firestore } from "../../firebase/firebase";
+
 export const getGroup = () => ({
   type: GroupActionTypes.GET_GROUPS,
 });
@@ -18,8 +19,9 @@ export function fetchGroups() {
     dispatch(getGroup());
     try {
       const myGroupList = [];
-      const response = firestore.collection("groupy");
+      const response = firestore.collection("group");
       const data = await response.get();
+      console.log("GROUPPPPP called", data);
       data.docs.forEach((item) => {
         let id = item.id;
         let data = item.data();
@@ -27,7 +29,7 @@ export function fetchGroups() {
         myGroupList.push({ id, ...data });
       });
 
-
+      
       dispatch(setGroup(myGroupList));
     } catch (error) {
       console.log(error);
@@ -35,5 +37,3 @@ export function fetchGroups() {
     }
   };
 }
-
-

@@ -1,24 +1,17 @@
-import logo from "./logo.svg";
 import "./App.css";
-import React, { useEffect } from "react";
-import { Switch, Route } from "react-router-dom";
+import React, { useEffect, Suspense, useState } from "react";
 import { auth, createUserProfileDocument } from "./firebase/firebase";
 import { connect } from "react-redux";
 import { setCurrentUser } from "./redux/user/user-action";
 
-import CreateGroup from "./components/creategroup/CreateGroup";
-
-import createPost from "./components/post/CreatePost";
-import MyGroup from "./components/mygroup/MyGroup";
-import ViewPost from "./components/viewpost/ViewPost";
 import HomePage from "./components/home/HomePage";
-import CreatePost from "./components/post/CreatePost";
-import { fetchGroups } from "./redux/group/group-action";
 
-function App({ setCurrentUser, fetchGroups }) {
+function App({ setCurrentUser }) {
+  const [userAvailable, setUserAvailable] = useState(false);
   let unsubscribeFromAuth = null;
 
   useEffect(() => {
+    console.log("APP USER CALLED");
     unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
       if (userAuth) {
         const userRef = await createUserProfileDocument(userAuth);
@@ -32,31 +25,19 @@ function App({ setCurrentUser, fetchGroups }) {
       }
 
       setCurrentUser(userAuth);
+      setUserAvailable(true);
     });
-    fetchGroups();
+
     return () => {
       unsubscribeFromAuth();
     };
   }, []);
 
-  // const link = currentUser ? <Profile /> : <SignIn />;
-
-  return (
-    <div className="App container">
-      <Switch>
-        <Route exact path="/" component={HomePage} />
-        <Route path="/creategroup" component={CreateGroup} />
-        <Route path="/mygroup" component={MyGroup} />
-        <Route path="/addpost" component={CreatePost} />
-        <Route path="/viewpost" component={ViewPost} />
-      </Switch>
-    </div>
-  );
+  return <div className="App ">{userAvailable  ? <HomePage /> : ""}</div>;
 }
 
 const mapDispatchToProps = (dispatch) => ({
   setCurrentUser: (user) => dispatch(setCurrentUser(user)),
-  fetchGroups: () => dispatch(fetchGroups()),
 });
 
 const mapStateToProps = (state) => {

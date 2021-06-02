@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { createPost, firestore } from "../../firebase/firebase";
 
-function CreatePost({ currentUser,groups }) {
+function CreatePost({ currentUser, groups }) {
   const [topic, setTopic] = React.useState("");
   const [posts, setPosts] = React.useState([]);
   let id = currentUser ? currentUser.id : "";
@@ -43,7 +43,7 @@ function CreatePost({ currentUser,groups }) {
       [name]: value,
     });
   };
-  console.log("POST", posts);
+  console.log("POST");
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -78,7 +78,6 @@ function CreatePost({ currentUser,groups }) {
 }
 
 const mapStateToProps = (state) => {
-  
   return {
     currentUser: state.user.currentUser,
     groups: state.group.group,

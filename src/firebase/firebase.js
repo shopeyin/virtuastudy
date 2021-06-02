@@ -25,7 +25,7 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
     const { displayName, email } = userAuth;
 
     const createdAt = new Date();
-
+    
     try {
       await userRef.set({
         displayName,
@@ -41,27 +41,8 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
   return userRef;
 };
 
-export const createGroup = async (userAuth, name) => {
-  if (!userAuth) {
-    return;
-  }
 
-  let groupRef = await firestore
-    .collection("groupy")
-    .add({
-      groupName: name,
-      adminName: userAuth.displayName,
-      adminId: userAuth.id,
-    })
-    .then(function (docRef) {
-      console.log("Document written with ID: ", docRef.id);
-    })
-    .catch(function (error) {
-      console.error("Error adding document: ", error);
-    });
 
-  return groupRef;
-};
 
 export const createPost = async (userAuth, title) => {
   if (!userAuth) {
@@ -87,53 +68,11 @@ export const createPost = async (userAuth, title) => {
   return postRef;
 };
 
-export const fetchMyGroup = async (userAuth) => {
-  if (!userAuth) {
-    return;
-  }
-  let myGroup = [];
-  if (userAuth.id) {
-    const response = firebase
-      .firestore()
-      .collection("groupy")
-      .where("adminId", "==", userAuth.id);
-    const data = await response.get();
-    data.docs.forEach((item) => {
-      let id = item.id;
-      let data = item.data();
-      myGroup.push({ id, ...data });
-      console.log(myGroup);
-    });
-  }
 
-  return myGroup;
-};
 
-export const fetchMyMembers = async (userAuth, group) => {
-  if (!userAuth) {
-    return;
-  }
-  let membersList = [];
-  if (userAuth.id) {
-    const response = await firebase
-      .firestore()
-      .collection("groupy")
-      .doc(group)
-      .collection("members");
-    const data = await response.get();
-    console.log(data);
-    data.docs.forEach((item) => {
-      let id = item.id;
-      let data = item.data();
-      console.log(item.data());
-      membersList.push({ id, ...data });
-    });
-  }
 
-  return membersList;
-};
 
-export const addGroupToUserTable = async (userAuthId, name) => {
+export const addGroupToUserTable = async (userAuthId, name, groupId) => {
   if (!userAuthId) {
     return;
   }
@@ -153,9 +92,10 @@ export const addGroupToUserTable = async (userAuthId, name) => {
       try {
         await memberRef.set({
           groupName: name,
+          groupId: groupId,
           joined,
         });
-        console.log("added to user members list");
+        console.log("added to user members list", groupId);
       } catch (err) {
         console.log("error creating users", err.message);
       }
