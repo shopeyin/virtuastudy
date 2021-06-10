@@ -10,7 +10,6 @@ const groupReducer = (state = INITIAL_STATE, action) => {
     case GroupActionTypes.GET_GROUPS:
       return { ...state, loading: true };
     case GroupActionTypes.SET_GROUP:
-      console.log("CALLED GROUP");
 
       return { group: action.payload, loading: false, hasErrors: false };
 

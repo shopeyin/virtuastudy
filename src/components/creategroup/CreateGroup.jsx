@@ -1,21 +1,23 @@
-
-
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 
 import {
   createNewGroup,
-  deleteAdminGroup,
+  deleteTopicAndGroup,
   fetchMyGroup,
   fetchMyMembers,
   JoinGroup,
+  deleteUserTopic,
 } from "../../firebase/adminGroup";
-import CreatePost from "../post/CreatePost";
+import CreateTopic from "../topic/CreateTopic";
 import { Link } from "react-router-dom";
 import { leaveTheGroup } from "../../firebase/userGroup";
+
+import { firestore } from "../../firebase/firebase";
+import { fetchTopics } from "../../redux/topic/topic-action";
 import Group from "./Group";
 
-function CreateGroup({ currentUser }) {
+function CreateGroup({ currentUser, fetchTopics, topics }) {
   const [name, setName] = useState("");
   const [myGroup, setMyGroup] = useState([]);
   const [groupAdded, setGroupAdded] = useState(false);
@@ -46,36 +48,90 @@ function CreateGroup({ currentUser }) {
     }
   };
 
-  const deleteGroup = (groupId) => {
-    deleteAdminGroup(groupId);
+  const deleteGroup = (column, groupId) => {
+    deleteTopicAndGroup(column, groupId);
     setDeleteGroupStatus(!deleteGroupStatus);
     members.length = 0;
+    if (topics.length) {
+      deleteTopic("topic", topics[0].id);
+    }
   };
+
+  const deleteTopic = (firestoreColumn, topicid) => {
+    deleteTopicAndGroup(firestoreColumn, topicid);
+    setDeleteGroupStatus(!deleteGroupStatus);
+  };
+
+  // useEffect(() => {
+  //   const fetchGroupCreated =  () => {
+  //     let group = [];
+  //     if (currentUser.id) {
+  //       firestore
+  //         .collection("group")
+  //         .where("adminId", "==", currentUser.id)
+  //         .get()
+  //         .then((data) => {
+  //           data.docs.forEach((item) => {
+  //             let id = item.id;
+  //             let data = item.data();
+  //             group.push({ id, ...data });
+  //           });
+  //           setMyGroup(group);
+  //         })
+  //         .then(() => setGroupLoaded(true))
+  //         .catch((err) => {
+  //           console.log("ERROR", err.message);
+  //         });
+  //     }
+  //   };
+
+  //   fetchGroupCreated();
+
+  //   return () => {
+  //     setMyGroup([]);
+  //   };
+  // }, [currentUser.id, groupAdded, deleteGroupStatus]);
 
   useEffect(() => {
     const fetchGroupCreated = async () => {
-      let groupArr = await fetchMyGroup(currentUser);
-      setMyGroup(groupArr);
-      setGroupLoaded(true);
+      let group = [];
+      if (currentUser.id) {
+        const data = await firestore
+          .collection("group")
+          .where("adminId", "==", currentUser.id)
+          .get();
+        data.docs.forEach((item) => {
+          let id = item.id;
+          let data = item.data();
+          group.push({ id, ...data });
+        });
+
+        setMyGroup(group);
+        setGroupLoaded(true);
+      }
     };
     fetchGroupCreated();
+    fetchTopics(currentUser);
   }, [currentUser.id, groupAdded, deleteGroupStatus]);
 
   useEffect(() => {
-    let groupId = myGroup.length ? myGroup[0].id : "";
-    let groupName = myGroup.length ? myGroup[0].groupName : "";
-    if (myGroup.length) {
-      JoinGroup(currentUser, groupId, groupName);
-      setTimeout(() => fetchGroupMembers(), 3000);
-    }
+    const fetchMembers = async () => {
+      let groupId = myGroup.length ? myGroup[0].id : "";
+      let groupName = myGroup.length ? myGroup[0].groupName : "";
+      if (myGroup.length) {
+        await JoinGroup(currentUser, groupId, groupName);
+        fetchGroupMembers();
+      }
+    };
+    fetchMembers();
   }, [myGroup]);
 
   let itemsToRender;
-  if (myGroup.length) {
+  if (groupLoaded && myGroup.length) {
     itemsToRender = myGroup.map((item) => {
       return <Group key={item.id} item={item} deleteGroup={deleteGroup} />;
     });
-  } else if (myGroup.length === 0 && groupLoaded) {
+  } else if (groupLoaded && myGroup.length === 0) {
     itemsToRender = (
       <div>
         <form onSubmit={handleSubmit}>
@@ -98,12 +154,17 @@ function CreateGroup({ currentUser }) {
       </div>
     );
   }
-  console.log("MEMBERSSS", members, members.length);
-  console.log("MYGROUP", myGroup.length);
   return (
     <div>
-      <h3>{currentUser ? currentUser.displayName : ""}</h3>
+      <h3></h3>
       {itemsToRender}
+      <CreateTopic
+        groupLoaded={groupLoaded}
+        myGroup={myGroup}
+        deleteTopic={deleteTopic}
+      />
+
+      <h3>Members</h3>
       {members.map((member) => {
         return (
           <div key={member.id}>
@@ -115,9 +176,9 @@ function CreateGroup({ currentUser }) {
   );
 }
 
-// const mapDispatchToProps = (dispatch) => ({
-//   setGroup: (group) => dispatch(setGroup(group)),
-// });
+const mapDispatchToProps = (dispatch) => ({
+  fetchTopics: (currentUser) => dispatch(fetchTopics(currentUser)),
+});
 
 const mapStateToProps = (state) => {
   console.log(state, "state is here");
@@ -125,9 +186,10 @@ const mapStateToProps = (state) => {
     currentUser: state.user.currentUser,
     groups: state.group.group,
     loading: state.group.loading,
-
     hasErrors: state.group.hasErrors,
+
+    topics: state.topic.topics,
   };
 };
 
-export default connect(mapStateToProps)(CreateGroup);
+export default connect(mapStateToProps, mapDispatchToProps)(CreateGroup);

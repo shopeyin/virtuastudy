@@ -1,9 +1,8 @@
 import { firestore, addGroupToUserTable } from "./firebase";
-export const createNewGroup = async (userAuth, name) => {
+export const createNewGroup = (userAuth, name) => {
   if (!userAuth) return;
 
- 
-  let groupRef = await firestore
+  let groupRef = firestore
     .collection("group")
     .add({
       groupName: name,
@@ -92,7 +91,7 @@ export const fetchMyMembers = async (userAuth, groupid) => {
     data.docs.forEach((item) => {
       let id = item.id;
       let data = item.data();
-      console.log(item.data());
+
       membersList.push({ id, ...data });
     });
   }
@@ -100,9 +99,9 @@ export const fetchMyMembers = async (userAuth, groupid) => {
   return membersList;
 };
 
-export const deleteAdminGroup = (groupId) => {
+export const deleteTopicAndGroup = (column, groupId) => {
   firestore
-    .collection("group")
+    .collection(column)
     .doc(groupId)
     .delete()
     .then(() => {

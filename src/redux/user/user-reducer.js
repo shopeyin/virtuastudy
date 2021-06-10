@@ -6,13 +6,13 @@ const INITIAL_STATE = {
 const userReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case UserActionTypes.SET_CURRENT_USER:
-      console.log("REDUX CALLED USER");
+     
       return {
         ...state,
         currentUser: action.payload,
       };
     case UserActionTypes.SIGN_OUT:
-      console.log("SIGN-OUTTT");
+     
       return {
         ...state,
         currentUser: null,

@@ -25,7 +25,7 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
     const { displayName, email } = userAuth;
 
     const createdAt = new Date();
-    
+
     try {
       await userRef.set({
         displayName,
@@ -41,17 +41,14 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
   return userRef;
 };
 
-
-
-
-export const createPost = async (userAuth, title) => {
+export const createTopic = async (userAuth, title) => {
   if (!userAuth) {
     return;
   }
   const createdAt = new Date();
 
-  let postRef = await firestore
-    .collection("posts")
+  let topicRef = await firestore
+    .collection("topic")
     .add({
       title: title.topic,
       adminName: userAuth.displayName,
@@ -65,12 +62,8 @@ export const createPost = async (userAuth, title) => {
       console.error("Error adding document: ", error);
     });
 
-  return postRef;
+  return topicRef;
 };
-
-
-
-
 
 export const addGroupToUserTable = async (userAuthId, name, groupId) => {
   if (!userAuthId) {

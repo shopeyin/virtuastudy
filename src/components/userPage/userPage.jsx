@@ -17,20 +17,34 @@ function UserPage({ currentUser, groups, loading, hasErrors, fetchGroups }) {
 
     if (groups.length === 0) return <p>No group yet</p>;
     return (
-      <div className="home">
+      <>
+        {" "}
         {groups.map((item) => {
           return (
-            <div key={item.id}>
-              {item.groupName}
-              <button
-                onClick={() => JoinGroup(currentUser, item.id, item.groupName)}
-              >
-                Join group
-              </button>
+            <div className="row m-2" key={item.id}>
+              <div className="col-12 col-sm-7 col-md-7 col-lg-6 ">
+                <div
+                  className="card rounded"
+                  key={item.id}
+                  style={{ width: "100%", minHeight: "6rem" }}
+                >
+                  <div className="card-body d-flex align-items-center justify-content-between">
+                    <h5 className="card-title">{item.groupName}</h5>
+
+                    <button
+                      onClick={() =>
+                        JoinGroup(currentUser, item.id, item.groupName)
+                      }
+                    >
+                      Join group
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           );
         })}
-      </div>
+      </>
     );
   };
 
@@ -55,11 +69,7 @@ function UserPage({ currentUser, groups, loading, hasErrors, fetchGroups }) {
             <h3 className="text-center">List of Groupsss</h3>
           </div>
         </div>{" "}
-        <div className="row">
-          <div className="col-md-12">
-            <h3 className="text-center">{renderGroups()}</h3>
-          </div>
-        </div>{" "}
+        {renderGroups()}
       </div>
     </div>
   );

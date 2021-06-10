@@ -1,11 +1,12 @@
 import React from "react";
 
 function Group({ item, deleteGroup }) {
-  
   return (
     <div>
       {item.id}---{item.groupName}
-      <button onClick={() => deleteGroup(item.id)}>Delete group </button>
+      <button onClick={() => deleteGroup("group", item.id)}>
+        Delete group{" "}
+      </button>
     </div>
   );
 }
