@@ -17,7 +17,7 @@ import { firestore } from "../../firebase/firebase";
 import { fetchTopics } from "../../redux/topic/topic-action";
 import Group from "./Group";
 
-function CreateGroup({ currentUser, fetchTopics, topics }) {
+function CreateGroup({ currentUser, fetchTopics, topics, comments }) {
   const [name, setName] = useState("");
   const [myGroup, setMyGroup] = useState([]);
   const [groupAdded, setGroupAdded] = useState(false);
@@ -52,6 +52,7 @@ function CreateGroup({ currentUser, fetchTopics, topics }) {
     deleteTopicAndGroup(column, groupId);
     setDeleteGroupStatus(!deleteGroupStatus);
     members.length = 0;
+    // comments.length = 0;
     if (topics.length) {
       deleteTopic("topic", topics[0].id);
     }
@@ -154,6 +155,7 @@ function CreateGroup({ currentUser, fetchTopics, topics }) {
       </div>
     );
   }
+  console.log("OYAAAA", comments);
   return (
     <div>
       <h3></h3>
@@ -189,6 +191,7 @@ const mapStateToProps = (state) => {
     hasErrors: state.group.hasErrors,
 
     topics: state.topic.topics,
+    comments: state.comments.comments,
   };
 };
 

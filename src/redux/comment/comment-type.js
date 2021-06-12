@@ -1,0 +1,7 @@
+const CommentActionTypes = {
+  SET_COMMENTS: "SET_COMMENTS",
+  GET_COMMENTS: "GET_COMMENTS",
+  GET_STATUS: "GET_STATUS",
+  GET_COMMENTS_FAILURE: "GET_COMMENTS_FAILURE",
+};
+export default CommentActionTypes;

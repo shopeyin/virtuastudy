@@ -10,6 +10,7 @@ import Navigation from "../navbar/Navbar";
 
 const UserPage = lazy(() => import("../userPage/userPage"));
 const CreateGroup = lazy(() => import("../creategroup/CreateGroup"));
+const GroupPage = lazy(() => import("../creategroup/GroupPage"));
 
 function HomeProfile() {
   return (
@@ -24,6 +25,7 @@ function HomeProfile() {
           <Route exact path="/" component={UserPage} />
           <Route path="/creategroup" component={CreateGroup} />
           <Route path="/mygroup" component={MyGroup} />
+          <Route path="/group" component={GroupPage} />
         </Suspense>
       </Switch>
     </div>

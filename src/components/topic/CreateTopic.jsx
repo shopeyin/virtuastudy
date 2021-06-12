@@ -1,7 +1,9 @@
-import React, { Component } from "react";
+import React from "react";
 import { connect } from "react-redux";
 import { createTopic, firestore } from "../../firebase/firebase";
 import { fetchTopics } from "../../redux/topic/topic-action";
+import PostComment from "../comment/PostComment";
+import ViewComment from "../comment/ViewComments";
 
 function CreateTopic({
   currentUser,
@@ -64,20 +66,6 @@ function CreateTopic({
       <div>
         {" "}
         <h3>MY TOPIC</h3>
-        {/* {topics.length ? (
-          <div key={topics[0].id}>
-            {topics[0].title}--{topics[0].id}
-            <button
-              type="submit"
-              className="btn btn-primary"
-              onClick={() => deleteTopic("topics", topics[0].id)}
-            >
-              Delete topic
-            </button>
-          </div>
-        ) : (
-          ""
-        )} */}
         {topics.map((topic) => {
           return (
             <div key={topic.id}>
@@ -89,6 +77,8 @@ function CreateTopic({
               >
                 Delete topic
               </button>
+              {/* <PostComment /> */}
+              <ViewComment />
             </div>
           );
         })}

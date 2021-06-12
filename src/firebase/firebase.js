@@ -98,6 +98,40 @@ export const addGroupToUserTable = async (userAuthId, name, groupId) => {
   return userAuthId;
 };
 
+export const addComment = async (topicId, comment, userAuth) => {
+  if (!userAuth) {
+    return;
+  }
+
+  if (userAuth) {
+    const commentRef = firebase
+      .firestore()
+      .collection("topic")
+      .doc(topicId)
+      .collection("comments")
+      .doc();
+    const snapShot = await commentRef.get();
+
+    if (!snapShot.exists) {
+      const datePosted = new Date();
+
+      try {
+        await commentRef.set({
+          comment,
+          datePosted,
+          name: userAuth.displayName,
+          userAuthId: userAuth.id,
+        });
+        console.log("comment added");
+      } catch (err) {
+        console.log("error posting comment", err.message);
+      }
+    }
+  }
+
+  return userAuth;
+};
+
 firebase.initializeApp(config);
 
 export const auth = firebase.auth();

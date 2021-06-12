@@ -99,6 +99,23 @@ export const fetchMyMembers = async (userAuth, groupid) => {
   return membersList;
 };
 
+export const fetchComments = async (topicId) => {
+  let commentList = [];
+  const response = firestore
+    .collection("topic")
+    .doc(topicId)
+    .collection("comments");
+  const data = await response.get();
+  data.docs.forEach((item) => {
+    let id = item.id;
+    let data = item.data();
+    commentList.push({ id, ...data });
+  });
+  return commentList;
+};
+
+ 
+
 export const deleteTopicAndGroup = (column, groupId) => {
   firestore
     .collection(column)

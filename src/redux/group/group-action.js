@@ -21,7 +21,7 @@ export function fetchGroups() {
       const myGroupList = [];
       const response = firestore.collection("group");
       const data = await response.get();
-      console.log("GROUPPPPP called", data);
+
       data.docs.forEach((item) => {
         let id = item.id;
         let data = item.data();
@@ -29,7 +29,6 @@ export function fetchGroups() {
         myGroupList.push({ id, ...data });
       });
 
-      
       dispatch(setGroup(myGroupList));
     } catch (error) {
       console.log(error);

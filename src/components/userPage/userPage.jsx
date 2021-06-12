@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-
+import { withRouter, useHistory } from "react-router-dom";
 import { JoinGroup } from "../../firebase/adminGroup";
 import { Link } from "react-router-dom";
 import { fetchGroups } from "../../redux/group/group-action";
@@ -10,6 +10,10 @@ function UserPage({ currentUser, groups, loading, hasErrors, fetchGroups }) {
     console.log("fetch groups called");
     fetchGroups();
   }, []);
+
+  const joinTheGroup = async (currentUser, itemid, itemgroupName) => {
+    await JoinGroup(currentUser, itemid, itemgroupName);
+  };
 
   const renderGroups = () => {
     if (loading) return <p>Loading groups...</p>;
@@ -33,7 +37,7 @@ function UserPage({ currentUser, groups, loading, hasErrors, fetchGroups }) {
 
                     <button
                       onClick={() =>
-                        JoinGroup(currentUser, item.id, item.groupName)
+                        joinTheGroup(currentUser, item.id, item.groupName)
                       }
                     >
                       Join group
@@ -89,4 +93,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(UserPage);
+export default withRouter(
+  connect(mapStateToProps, mapDispatchToProps)(UserPage)
+);
