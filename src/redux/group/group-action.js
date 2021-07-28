@@ -10,6 +10,11 @@ export const setGroup = (group) => ({
   payload: group,
 });
 
+export const setMyGroup = (mygroup) => ({
+  type: GroupActionTypes.SET_MYGROUP,
+  payload: mygroup,
+});
+
 export const getGroupFailure = () => ({
   type: GroupActionTypes.GET_GROUP_FAILURE,
 });
@@ -36,3 +41,49 @@ export function fetchGroups() {
     }
   };
 }
+
+export function fetchMyGroup(userAuth, myCallback) {
+  return async (dispatch) => {
+    dispatch(getGroup());
+    try {
+      let myGroup = [];
+      if (userAuth.id) {
+        const data = await firestore
+          .collection("group")
+          .where("adminId", "==", userAuth.id)
+          .get();
+        data.docs.forEach((item) => {
+          let id = item.id;
+          let data = item.data();
+          myGroup.push({ id, ...data });
+        });
+
+        myCallback();
+
+        dispatch(setMyGroup(myGroup));
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(getGroupFailure());
+    }
+  };
+}
+
+// export const fetchGroupCreated = async (userAuth, myCallback) => {
+//   let group = [];
+//   if (userAuth.id) {
+//     const data = await firestore
+//       .collection("group")
+//       .where("adminId", "==", userAuth.id)
+//       .get();
+//     data.docs.forEach((item) => {
+//       let id = item.id;
+//       let data = item.data();
+//       group.push({ id, ...data });
+//     });
+
+//     myCallback();
+//   }
+
+//   return group;
+// };

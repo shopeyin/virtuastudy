@@ -45,18 +45,21 @@ export const createTopic = async (userAuth, title) => {
   if (!userAuth) {
     return;
   }
+
+  const { displayName, id } = userAuth;
   const createdAt = new Date();
 
   let topicRef = await firestore
     .collection("topic")
+
     .add({
       title: title.topic,
-      adminName: userAuth.displayName,
-      adminId: userAuth.id,
+      adminName: displayName,
+      adminId: id,
       datePosted: createdAt,
     })
-    .then(function (docRef) {
-      console.log("Document written with ID: ", docRef.id);
+    .then(function () {
+      console.log("Document written");
     })
     .catch(function (error) {
       console.error("Error adding document: ", error);

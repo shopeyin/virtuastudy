@@ -13,15 +13,14 @@ export const getCommentsFailure = () => ({
   type: CommentActionTypes.GET_COMMENTS_FAILURE,
 });
 
-
-export function fetchComments(topicId) {
+export function fetchComments(groupTopicId) {
   return async (dispatch) => {
     dispatch(getComments());
     try {
       let commentList = [];
       const response = firestore
         .collection("topic")
-        .doc(topicId)
+        .doc(groupTopicId)
         .collection("comments");
       const data = await response.get();
       data.docs.forEach((item) => {

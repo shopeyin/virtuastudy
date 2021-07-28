@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import { addComment } from "../../firebase/firebase";
 import { delStatus } from "../../redux/delStatus/delStatus-action";
 import { fetchComments } from "../../redux/comment/comment-action";
-function PostComment({ topics, currentUser, delStatus }) {
+function PostComment({ topics, currentUser, delStatus, groupTopic }) {
   const [show, setShow] = useState(false);
   const [comment, setComment] = useState("");
 
@@ -20,7 +20,7 @@ function PostComment({ topics, currentUser, delStatus }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    await addComment(topics[0].id, comment.comment, currentUser);
+    await addComment(groupTopic[0].id, comment.comment, currentUser);
     console.log("post submit called");
     delStatus();
     event.target.reset();

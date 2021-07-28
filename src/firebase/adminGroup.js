@@ -57,33 +57,13 @@ export const JoinGroup = async (userAuth, groupid, groupname) => {
   return memberRef;
 };
 
-export const fetchMyGroup = async (userAuth) => {
-  if (!userAuth) {
-    return;
-  }
-  let myGroup = [];
-  if (userAuth.id) {
-    const response = firestore
-      .collection("group")
-      .where("adminId", "==", userAuth.id);
-    const data = await response.get();
-    data.docs.forEach((item) => {
-      let id = item.id;
-      let data = item.data();
-      myGroup.push({ id, ...data });
-    });
-  }
-
-  return myGroup;
-};
-
 export const fetchMyMembers = async (userAuth, groupid) => {
   if (!userAuth) {
     return;
   }
   let membersList = [];
   if (userAuth.id) {
-    const response = await firestore
+    const response = firestore
       .collection("group")
       .doc(groupid)
       .collection("members");
@@ -114,17 +94,34 @@ export const fetchComments = async (topicId) => {
   return commentList;
 };
 
- 
-
-export const deleteTopicAndGroup = (column, groupId) => {
+export const deleteTopicOrGroup = (column, groupId) => {
   firestore
     .collection(column)
     .doc(groupId)
     .delete()
     .then(() => {
-      console.log("Group successfully deleted!");
+      console.log("successfully deleted!");
     })
     .catch((error) => {
       console.error("Error removing document: ", error);
     });
+};
+
+export const fetchGroupCreated = async (userAuth, myCallback) => {
+  let group = [];
+  if (userAuth.id) {
+    const data = await firestore
+      .collection("group")
+      .where("adminId", "==", userAuth.id)
+      .get();
+    data.docs.forEach((item) => {
+      let id = item.id;
+      let data = item.data();
+      group.push({ id, ...data });
+    });
+
+    myCallback();
+  }
+
+  return group;
 };

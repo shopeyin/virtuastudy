@@ -1,15 +1,22 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { withRouter, useHistory } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import { JoinGroup } from "../../firebase/adminGroup";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { fetchGroups } from "../../redux/group/group-action";
 import "./userpage.style.scss";
+
 function UserPage({ currentUser, groups, loading, hasErrors, fetchGroups }) {
   useEffect(() => {
-    console.log("fetch groups called");
+    console.log("fetch groups called userpage");
     fetchGroups();
   }, []);
+
+  const history = useHistory();
+
+  const routeChange = (groupId) => {
+    history.push(`group/${groupId}`);
+  };
 
   const joinTheGroup = async (currentUser, itemid, itemgroupName) => {
     await JoinGroup(currentUser, itemid, itemgroupName);
@@ -36,9 +43,10 @@ function UserPage({ currentUser, groups, loading, hasErrors, fetchGroups }) {
                     <h5 className="card-title">{item.groupName}</h5>
 
                     <button
-                      onClick={() =>
-                        joinTheGroup(currentUser, item.id, item.groupName)
-                      }
+                      onClick={() => {
+                        joinTheGroup(currentUser, item.id, item.groupName);
+                        routeChange(item.id);
+                      }}
                     >
                       Join group
                     </button>
